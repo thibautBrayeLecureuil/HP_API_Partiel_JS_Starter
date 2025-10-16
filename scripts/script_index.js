@@ -1,3 +1,5 @@
+var selectedHouse = "";
+var displayedCharacters = []
 function loadHouses() {
     let houses_div = document.querySelector(".houses");
 
@@ -7,20 +9,28 @@ function loadHouses() {
     houses_div.appendChild(createHouse("Slytherin","images/logo/Slytherin.png"));
 }
 
-function load() {
-    loadHouses();
-    displayCharacters()
-}
-
 function createHouse(houseName,imagePath) {
     let house = document.createElement("div");
     house.classList.add(houseName);
     house.innerHTML += `
         <picture>
-            <img src="${imagePath}" alt="${houseName} emblem" />
+            <img src="${imagePath}" alt="${houseName} emblem" id="${houseName}" />
         </picture>
     `
+
+    addHouseEvent(house)
+
     return house;
+}
+
+function addHouseEvent(house) {
+    house.addEventListener("click", (e) => {
+        selectedHouse = e.target.id;
+        displayedCharacters.forEach(character => {
+            character.remove();
+        })
+        displayCharacters(selectedHouse);
+    })
 }
 
 async function getCharacters(){
@@ -29,24 +39,44 @@ async function getCharacters(){
     .catch(err => console.log(err));
 }
 
-async function displayCharacters() {
+async function displayCharacters(house) {
+
     let characters_div = document.querySelector(".characters");
 
     let characters_response = await getCharacters();
 
+    characters_response = sort(characters_response, house);
+
     for (let i = 0; i < 12; i++) {
-        characters_div.appendChild(createCharacter(characters_response[i]));
+        let character = createCharacter(characters_response[i])
+        characters_div.appendChild(character);
+        displayedCharacters.push(character);
     }
 }
 
+function sort(characters, house) {
+    if (house !== "") {
+        characters = characters.filter((character) => character.house === house);
+    }
+
+    characters.sort((CharacterA, CharacterB) => CharacterA.name.localeCompare(CharacterB.name));
+
+    return characters;
+}
 function createCharacter(characterData){
     let character = document.createElement("div");
     character.innerHTML += `
-        <img class="${characterData.house}_Character" src="${characterData.image}" alt="${characterData.name}"/>
+        <a href="./details.html">
+        <img class="${characterData.house}_Character" src="${characterData.image === "" ? "./images/characters/troll.jpg" : characterData.image}" alt="${characterData.name}"/>
         <p>${characterData.name}</p>
+        </a>
     `
     return character;
 }
 
+function load() {
+    loadHouses();
+    displayCharacters(selectedHouse);
+}
 
 load()
