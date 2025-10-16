@@ -66,7 +66,7 @@ function sort(characters, house) {
 function createCharacter(characterData){
     let character = document.createElement("div");
     character.innerHTML += `
-        <a href="./details.html">
+        <a href="./details.html?id=${characterData.id}">
         <img class="${characterData.house}_Character" src="${characterData.image === "" ? "./images/characters/troll.jpg" : characterData.image}" alt="${characterData.name}"/>
         <p>${characterData.name}</p>
         </a>
