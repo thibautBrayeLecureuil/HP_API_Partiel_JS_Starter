@@ -39,13 +39,13 @@ async function getCharacters(){
     .catch(err => console.log(err));
 }
 
-async function displayCharacters(house) {
+async function displayCharacters(house,alphabetical=false,byAge=false) {
 
     let characters_div = document.querySelector(".characters");
 
     let characters_response = await getCharacters();
 
-    characters_response = sort(characters_response, house);
+    characters_response = sort(characters_response, house,alphabetical,byAge);
 
     for (let i = 0; i < 12; i++) {
         let character = createCharacter(characters_response[i])
@@ -54,12 +54,19 @@ async function displayCharacters(house) {
     }
 }
 
-function sort(characters, house) {
+function sort(characters, house, alphabetical, byAge) {
     if (house !== "") {
         characters = characters.filter((character) => character.house === house);
+        characters.sort((CharacterA, CharacterB) => CharacterA.name.localeCompare(CharacterB.name));
     }
-
-    characters.sort((CharacterA, CharacterB) => CharacterA.name.localeCompare(CharacterB.name));
+    if (alphabetical) {
+        characters.sort((CharacterA, CharacterB) => CharacterA.name.localeCompare(CharacterB.name));
+    }
+    if (byAge) {
+        characters.sort((CharacterA, CharacterB) => {
+            return CharacterA.yearOfBirth - CharacterB.yearOfBirth;
+        });
+    }
 
     return characters;
 }
@@ -77,6 +84,25 @@ function createCharacter(characterData){
 function load() {
     loadHouses();
     displayCharacters(selectedHouse);
+    button();
+}
+
+function button() {
+    let buttonAlpha = document.querySelector(".Alphabetical");
+    buttonAlpha.addEventListener("click", (e) => {
+        displayedCharacters.forEach(character => {
+            character.remove();
+        });
+        displayCharacters(selectedHouse,true);
+    })
+
+    let buttonAge = document.querySelector(".Age");
+    buttonAge.addEventListener("click", (e) => {
+        displayedCharacters.forEach(character => {
+            character.remove();
+        });
+        displayCharacters(selectedHouse,false,true);
+    })
 }
 
 load()
